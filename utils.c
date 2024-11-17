@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/17 16:19:41 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/11/17 17:06:37 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/11/17 17:22:53 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,17 +62,18 @@ int create_philosophers(t_simulation *simulation)
         simulation->philosophers[i].is_dead = 0;
         simulation->philosophers[i].left_fork = &simulation->forks[i];
         simulation->philosophers[i].right_fork = &simulation->forks[(i + 1) % simulation->num_philosophers];
-        simulation->philosophers[i].death_mutex = &simulation->print_mutex;
-        simulation->philosophers[i].time_to_die = 500;
-        simulation->philosophers[i].time_to_eat = 200;
-        simulation->philosophers[i].time_to_sleep = 200;
 
+        // Inicjalizujemy mutex dla ochrony danych filozofa
+        pthread_mutex_init(&simulation->philosophers[i].death_mutex, NULL);
+
+        // Tworzymy wątek filozofa
         pthread_create(&simulation->philosophers[i].thread, NULL, philosopher_routine, (void *)&simulation->philosophers[i]);
 
         i++;
     }
     return 0;
 }
+
 
 // Funkcja inicjalizująca mutexy dla widelców
 int initialize_forks(t_simulation *simulation)

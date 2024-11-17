@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/17 16:13:16 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/11/17 17:07:17 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/11/17 17:21:13 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ typedef struct s_philosopher
     int is_dead;
     pthread_mutex_t *left_fork;
     pthread_mutex_t *right_fork;
-    pthread_mutex_t *death_mutex;
+    pthread_mutex_t death_mutex;
     long long time_to_die;
     long long time_to_eat;
     long long time_to_sleep;

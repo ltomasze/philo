@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/17 16:24:18 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/11/17 17:08:04 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/11/17 17:18:32 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,10 +85,19 @@ int main(int argc, char **argv)
         i++;
     }
 
+    // Zwalnianie mutexów dla każdego filozofa
+    i = 0;
+    while (i < simulation.num_philosophers)
+    {
+        pthread_mutex_destroy(&simulation.philosophers[i].death_mutex); // Zniszczenie mutexa death_mutex
+        i++;
+    }
+
     // Czyszczenie pamięci i zwalnianie zasobów
     free(simulation.philosophers);
     free(simulation.forks);
 
     return 0;
 }
+
 
