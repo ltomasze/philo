@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/17 16:13:16 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/11/17 17:21:13 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:41:31 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ typedef struct s_philosopher
     long long time_to_die;
     long long time_to_eat;
     long long time_to_sleep;
+    struct s_simulation *simulation; // Wskaźnik do symulacji
 } t_philosopher;
 
 typedef struct s_simulation
@@ -48,6 +49,7 @@ typedef struct s_simulation
 
 long long get_time(void);
 void *philosopher_routine(void *arg);
+void *monitor_routine(void *arg);
 int create_philosophers(t_simulation *simulation);
 int initialize_forks(t_simulation *simulation);
 int parse_arguments(int argc, char **argv, t_simulation *simulation);
