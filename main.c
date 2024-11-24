@@ -1,13 +1,14 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include <stdio.h>
 
 # define PHILO_MAX 200
 
 typedef struct s_philo
 {
 	int	id;
-	int eating;
+	int eat_now;
 	int meals_eaten;
 	int	number_of_philosophers;
 	size_t	time_to_die;
@@ -25,14 +26,14 @@ typedef struct s_philo
 
 } t_philo;
 
-typedef struct s_system
+typedef struct s_simulation
 {
 	int	flag_death;
 	pthread_mutex_t write_lock;
 	pthread_mutex_t death_lock;
 	pthread_mutex_t meal_lock;
-	t_philo	*philosophers;
-} t_system;
+	t_philo	*philo_sim;
+} t_simulation;
 
 int	ft_atoi(const char *nptr)
 {
@@ -79,26 +80,6 @@ size_t	get_current_time(void)
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-void	destroy_mutex(char *str, t_system *system, pthread_mutex_t *forks)
-{
-	int	i;
-
-	i = 0;
-	if (str)
-	{
-		write(2, str, ft_strlen(str));
-		write(2, "\n", 1);
-	}
-	pthread_mutex_destroy(&system->write_lock);
-	pthread_mutex_destroy(&system->meal_lock);
-	pthread_mutex_destroy(&system->death_lock);
-	while (i < system->philosophers[0].number_of_philosophers)
-	{
-		pthread_mutex_destroy(&forks[i]);
-		i++;
-	}
-}
-
 int check_inside_arg(char *arg)
 {
 	int i;
@@ -129,15 +110,16 @@ int check_correct_args(char **argv)
 	return (0);
 }
 
-void init_system(t_system *system, t_philo *philosophers)
+void init_simulation(t_simulation *t_simulation, t_philo *philo_sim)
 {
-	system->flag_death = 0;
-	system->philosophers = philosophers;
-	pthread_mutex_init(&system->write_lock, NULL);
-	pthread_mutex_init(&system->death_lock, NULL);
-	pthread_mutex_init(&system->meal_lock, NULL);
+	t_simulation->flag_death = 0;
+	t_simulation->philo_sim = philo_sim;
+	pthread_mutex_init(&t_simulation->write_lock, NULL);
+	pthread_mutex_init(&t_simulation->death_lock, NULL);
+	pthread_mutex_init(&t_simulation->meal_lock, NULL);
 
 }
+
 void init_forks(pthread_mutex_t *forks, int nbr_philosophers)
 {
 	int	i;
@@ -162,48 +144,165 @@ void init_inside_philo(t_philo *philo, char **argv)
 		philo->number_of_times_each_philosopher_must_eat = -1;
 }
 
-void	init_philosophers(t_philo *philosophers, t_system *system, 
-	pthread_mutex_t *forks, char **argv)
+void	init_philosophers(t_philo *philo_sim, t_simulation *t_simulation, 
+			pthread_mutex_t *forks, char **argv)
 {
 	int	i;
 
 	i = 0;
 	while (i < ft_atoi(argv[1]))
 	{
-		philosophers[i].id = i + 1;
-		philosophers[i].eating = 0;
-		philosophers[i].meals_eaten = 0;
-		init_inside_philo(&philosophers[i], argv);
-		philosophers[i].start_time = get_current_time();
-		philosophers[i].last_meal = get_current_time();
-		philosophers[i].write_lock = &system->write_lock;
-		philosophers[i].death_lock = &system->death_lock;
-		philosophers[i].meal_lock = &system->meal_lock;
-		philosophers[i].flag_death = &system->flag_death;
-		philosophers[i].left_fork = &forks[i];
+		philo_sim[i].id = i + 1;
+		philo_sim[i].eat_now = 0;
+		philo_sim[i].meals_eaten = 0;
+		init_inside_philo(&philo_sim[i], argv);
+		philo_sim[i].start_time = get_current_time();
+		philo_sim[i].last_meal = get_current_time();
+		philo_sim[i].write_lock = &t_simulation->write_lock;
+		philo_sim[i].death_lock = &t_simulation->death_lock;
+		philo_sim[i].meal_lock = &t_simulation->meal_lock;
+		philo_sim[i].flag_death = &t_simulation->flag_death;
+		philo_sim[i].left_fork = &forks[i];
 		if (i == 0)
-			philosophers[i].right_fork = 
-				&forks[philosophers[i].number_of_philosophers];
+			philo_sim[i].right_fork = 
+				&forks[philo_sim[i].number_of_philosophers];
 		else
-			philosophers[i].right_fork = &forks[i - 1];
+			philo_sim[i].right_fork = &forks[i - 1];
 		i++;
 	}
 }
 
+void	destroy_mutex(char *str, t_simulation *t_simulation, 
+			pthread_mutex_t *forks)
+{
+	int	i;
+
+	i = 0;
+	if (str)
+	{
+		write(2, str, ft_strlen(str));
+		write(2, "\n", 1);
+	}
+	pthread_mutex_destroy(&t_simulation->write_lock);
+	pthread_mutex_destroy(&t_simulation->meal_lock);
+	pthread_mutex_destroy(&t_simulation->death_lock);
+	while (i < t_simulation->philo_sim[0].number_of_philosophers)
+	{
+		pthread_mutex_destroy(&forks[i]);
+		i++;
+	}
+}
+
+int death_philosopher(t_philo *philo, size_t time_to_die)
+{
+	pthread_mutex_lock(philo->meal_lock);
+	if (get_current_time() - philo->last_meal >= time_to_die
+			&& philo->eat_now == 0)
+			return (pthread_mutex_unlock(philo->meal_lock), 1);
+	pthread_mutex_unlock(philo->meal_lock);
+	return (0);
+}
+
+int	death_loop(t_philo *philo)
+{
+	pthread_mutex_lock(philo->death_lock);
+	if (*philo->flag_death == 1)
+		return (pthread_mutex_unlock(philo->death_lock), 1);
+	pthread_mutex_unlock(philo->death_lock);
+	return (0);
+}
+
+void display_info(char *str, t_philo *philo, int id)
+{
+	size_t time;
+
+	pthread_mutex_lock(philo->write_lock);
+	time = get_current_time() - philo->start_time;
+	if (!death_loop(philo))
+		printf("%zu %d %s\n", time, id, str);
+	pthread_mutex_unlock(philo->write_lock);
+}
+
+int if_death(t_philo *philo_sim)
+{
+	int	i;
+
+	i = 0;
+	while (i < philo_sim[0].number_of_philosophers)
+	{
+		if (death_philosopher(&philo_sim[i], philo_sim[i].time_to_die))
+		{
+			display_info("died", &philo_sim[i], philo_sim[i].id);
+			pthread_mutex_lock(philo_sim[0].death_lock);
+			*philo_sim->flag_death = 1;
+			pthread_mutex_unlock(philo_sim[0].death_lock);
+			return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+int if_finish_eat(t_philo *philo_sim)
+{
+	int i;
+	int	finish_eat;
+	if (philo_sim[0].number_of_times_each_philosopher_must_eat == -1)
+		return (0);
+	while (i < philo_sim[0].number_of_philosophers)
+	{
+		pthread_mutex_lock(philo_sim[i].meal_lock);
+		if (philo_sim[i].meals_eaten >=
+			philo_sim[i].number_of_times_each_philosopher_must_eat)
+				finish_eat++;
+		pthread_mutex_unlock(philo_sim[i].meal_lock);
+		i++;
+	}
+	if (finish_eat == philo_sim[0].number_of_philosophers)
+	{
+		pthread_mutex_lock(philo_sim[0].death_lock);
+		*philo_sim->flag_death = 1;
+		pthread_mutex_unlock(philo_sim[0].death_lock);
+		return (1);
+	}
+	return (0);
+}
+
+void	*monitor(void	*ptr)
+{
+	t_philo *philo_sim;
+
+	philo_sim = (t_philo *)ptr;
+	while(1)
+		if (if_death(philo_sim) == 1 || if_finish_eat(philo_sim) == 1)
+			break;
+	return (ptr);
+}
+
+int	thread_create(t_simulation *t_simulation, pthread_mutex_t *forks)
+{
+	pthread_t	monitor_thread;
+	int	i;
+	if (pthread_create(&monitor_thread, NULL, 
+			&monitor, t_simulation->philo_sim) !=0)
+		destroy_mutex("THREAD CREATE ERROR!", t_simulation, forks);
+	return (0);
+}
+
 int	main(int argc, char **argv)
 {
-	t_system	system;
-	t_philo		philosophers[PHILO_MAX];
+	t_simulation	t_simulation;
+	t_philo		philo_sim[PHILO_MAX];
 	pthread_mutex_t forks[PHILO_MAX];
 
 	if (argc != 5 && argc != 6)
 		return(write(2, "WRONG NUMBER OF ARGUMENTS!\n", 23), 1);
 	if (check_correct_args(argv) == 1)
 		return (1);
-	init_system(&system, philosophers);
+	init_simulation(&t_simulation, philo_sim);
 	init_forks(forks, ft_atoi(argv[1]));
-	init_philosophers(philosophers, &system, forks, argv);
-	thread_create(&system, forks);
-	destroy_mutex(NULL, &system, forks);
+	init_philosophers(philo_sim, &t_simulation, forks, argv);
+	thread_create(&t_simulation, forks);
+	destroy_mutex(NULL, &t_simulation, forks);
 	return (0);
 }
