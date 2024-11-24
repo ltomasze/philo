@@ -23,6 +23,7 @@ typedef struct s_philo
 	int	*flag_death;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
+	pthread_t	thread;
 
 } t_philo;
 
@@ -289,8 +290,12 @@ int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 			destroy_mutex("THREAD CREATE ERROR!", 
 			simulation, forks);
 	i = 0;
-	/*while (i < simulation->philo_)*/
+	while (i < simulation->philo_sim[0].number_of_philosophers)
+	{
+		if (pthread_create(&simulation->philo_sim[i].thread, NULL, 
+			&philo_routine, &simulation->philo_sim[i]) != 0)
 
+	}
 	return (0);
 }
 
