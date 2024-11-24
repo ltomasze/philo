@@ -60,6 +60,16 @@ int	ft_atoi(const char *nptr)
 	return (num * sign);
 }
 
+size_t	ft_strlen(const char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] != '\0')
+		i++;
+	return (i);
+}
+
 size_t	get_current_time(void)
 {
 	struct timeval	time;
@@ -67,6 +77,26 @@ size_t	get_current_time(void)
 	if (gettimeofday(&time, NULL) == -1)
 		write(2, "ERROR gettimeofday()!\n", 22);
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+}
+
+void	destroy_mutex(char *str, t_system *system, pthread_mutex_t *forks)
+{
+	int	i;
+
+	i = 0;
+	if (str)
+	{
+		write(2, str, ft_strlen(str));
+		write(2, "\n", 1);
+	}
+	pthread_mutex_destroy(&system->write_lock);
+	pthread_mutex_destroy(&system->meal_lock);
+	pthread_mutex_destroy(&system->death_lock);
+	while (i < system->philosophers[0].number_of_philosophers)
+	{
+		pthread_mutex_destroy(&forks[i]);
+		i++;
+	}
 }
 
 int check_inside_arg(char *arg)
@@ -94,7 +124,7 @@ int check_correct_args(char **argv)
 		return (write(2, "WRONG TIME TO EAT PHILOSOPHERS!\n", 32), 1);
 	if (ft_atoi(argv[4]) <= 0 || check_inside_arg(argv[4]) == 1)
 		return (write(2, "WRONG TIME TO SLEEP PHILOSOPHERS!\n", 34)), 1;
-	if (argv[5] && ft_atoi(argv[5]) < 0 || check_inside_arg(argv[5]) == 1)
+	if (argv[5] && (ft_atoi(argv[5]) < 0 || check_inside_arg(argv[5]) == 1))
 		return (write(2, "WRONG NBR OF TIMES EACH PHILO MUST EAT!\n", 43), 1);
 	return (0);
 }
@@ -173,5 +203,7 @@ int	main(int argc, char **argv)
 	init_system(&system, philosophers);
 	init_forks(forks, ft_atoi(argv[1]));
 	init_philosophers(philosophers, &system, forks, argv);
+	thread_create(&system, forks);
+	destroy_mutex(NULL, &system, forks);
 	return (0);
 }
