@@ -110,14 +110,14 @@ int check_correct_args(char **argv)
 	return (0);
 }
 
-void init_simulation(t_simulation *t_simulation, t_philo *philo_sim)
+void init_simulation(t_simulation *simulation, t_philo *philo_sim)
 {
-	t_simulation->flag_death = 0;
-	t_simulation->philo_sim = philo_sim;
-	pthread_mutex_init(&t_simulation->write_lock, NULL);
-	pthread_mutex_init(&t_simulation->death_lock, NULL);
-	pthread_mutex_init(&t_simulation->meal_lock, NULL);
-
+	
+	simulation->flag_death = 0;
+	simulation->philo_sim = philo_sim;
+	pthread_mutex_init(&simulation->write_lock, NULL);
+	pthread_mutex_init(&simulation->death_lock, NULL);
+	pthread_mutex_init(&simulation->meal_lock, NULL);
 }
 
 void init_forks(pthread_mutex_t *forks, int nbr_philosophers)
@@ -144,7 +144,7 @@ void init_inside_philo(t_philo *philo, char **argv)
 		philo->number_of_times_each_philosopher_must_eat = -1;
 }
 
-void	init_philo_sim(t_philo *philo_sim, t_simulation *t_simulation, 
+void	init_philo_sim(t_philo *philo_sim, t_simulation *simulation, 
 			pthread_mutex_t *forks, char **argv)
 {
 	int	i;
@@ -158,10 +158,10 @@ void	init_philo_sim(t_philo *philo_sim, t_simulation *t_simulation,
 		init_inside_philo(&philo_sim[i], argv);
 		philo_sim[i].start_time = get_current_time();
 		philo_sim[i].last_meal = get_current_time();
-		philo_sim[i].write_lock = &t_simulation->write_lock;
-		philo_sim[i].death_lock = &t_simulation->death_lock;
-		philo_sim[i].meal_lock = &t_simulation->meal_lock;
-		philo_sim[i].flag_death = &t_simulation->flag_death;
+		philo_sim[i].write_lock = &simulation->write_lock;
+		philo_sim[i].death_lock = &simulation->death_lock;
+		philo_sim[i].meal_lock = &simulation->meal_lock;
+		philo_sim[i].flag_death = &simulation->flag_death;
 		philo_sim[i].left_fork = &forks[i];
 		if (i == 0)
 			philo_sim[i].right_fork = 
@@ -172,7 +172,7 @@ void	init_philo_sim(t_philo *philo_sim, t_simulation *t_simulation,
 	}
 }
 
-void	destroy_mutex(char *str, t_simulation *t_simulation, 
+void	destroy_mutex(char *str, t_simulation *simulation, 
 			pthread_mutex_t *forks)
 {
 	int	i;
@@ -183,10 +183,11 @@ void	destroy_mutex(char *str, t_simulation *t_simulation,
 		write(2, str, ft_strlen(str));
 		write(2, "\n", 1);
 	}
-	pthread_mutex_destroy(&t_simulation->write_lock);
-	pthread_mutex_destroy(&t_simulation->meal_lock);
-	pthread_mutex_destroy(&t_simulation->death_lock);
-	while (i < t_simulation->philo_sim[0].number_of_philosophers)
+	pthread_mutex_destroy(&simulation->write_lock);
+	pthread_mutex_destroy(&simulation->meal_lock);
+	pthread_mutex_destroy(&simulation->death_lock);
+	while (i < 
+	simulation->philo_sim[0].number_of_philosophers)
 	{
 		pthread_mutex_destroy(&forks[i]);
 		i++;
@@ -279,19 +280,24 @@ void	*monitor(void	*ptr)
 	return (ptr);
 }
 
-int	thread_create(t_simulation *t_simulation, pthread_mutex_t *forks)
+int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
 	pthread_t	monitor_thread;
 	int	i;
 	if (pthread_create(&monitor_thread, NULL, 
-			&monitor, t_simulation->philo_sim) !=0)
-		destroy_mutex("THREAD CREATE ERROR!", t_simulation, forks);
+		&monitor, simulation->philo_sim) !=0)
+			destroy_mutex("THREAD CREATE ERROR!", 
+			simulation, forks);
+	i = 0;
+	/*while (i < simulation->philo_)*/
+
 	return (0);
 }
 
 int	main(int argc, char **argv)
 {
-	t_simulation	t_simulation;
+	
+	t_simulation	simulation;
 	t_philo		philo_sim[PHILO_MAX];
 	pthread_mutex_t forks[PHILO_MAX];
 
@@ -299,10 +305,10 @@ int	main(int argc, char **argv)
 		return(write(2, "WRONG NUMBER OF ARGUMENTS!\n", 23), 1);
 	if (check_correct_args(argv) == 1)
 		return (1);
-	init_simulation(&t_simulation, philo_sim);
+	init_simulation(&simulation, philo_sim);
 	init_forks(forks, ft_atoi(argv[1]));
-	init_philo_sim(philo_sim, &t_simulation, forks, argv);
-	thread_create(&t_simulation, forks);
-	destroy_mutex(NULL, &t_simulation, forks);
+	init_philo_sim(philo_sim, &simulation, forks, argv);
+	thread_create(&simulation, forks);
+	destroy_mutex(NULL, &simulation, forks);
 	return (0);
 }
