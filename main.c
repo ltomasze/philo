@@ -324,6 +324,7 @@ void	philo_think(t_philo *philo)
 {
 	display_info("is thinking", philo, philo->id);
 }
+
 void	*philo_routine(void *ptr)
 {
 	t_philo	*philo;
@@ -339,29 +340,29 @@ void	*philo_routine(void *ptr)
 	}
 	return(ptr);
 }
+
 int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
 	pthread_t	monitor_thread;
 	int	i;
 	if (pthread_create(&monitor_thread, NULL, 
 		&monitor, simulation->philo_sim) !=0)
-			destroy_mutex("THREAD CREATE ERROR!", 
-			simulation, forks);
+			destroy_mutex("THREAD CREATE ERROR!", simulation, forks);
 	i = 0;
 	while (i < simulation->philo_sim[0].number_of_philosophers)
 	{
 		if (pthread_create(&simulation->philo_sim[i].thread, NULL, 
 				&philo_routine, &simulation->philo_sim[i]) != 0)
-			destroy_mutex("WRONG THREAD CREATE", simulation, forks);
+			destroy_mutex("WRONG THREAD CREATE!", simulation, forks);
 		i++;
 	}
 	i = 0;
 	if(pthread_join(monitor_thread, NULL) != 0)
-		destroy_mutex("WRONG THREAD JOIN", simulation, forks);
+		destroy_mutex("WRONG THREAD JOIN!", simulation, forks);
 	while (i < simulation->philo_sim[0].number_of_philosophers)
 	{
 		if (pthread_join(simulation->philo_sim[0].thread, NULL) != 0)
-			destroy_mutex("WRONG THREAD JOIN", simulation, forks);
+			destroy_mutex("WRONG THREAD JOIN!", simulation, forks);
 		i++;
 	}
 	return (0);
@@ -375,7 +376,7 @@ int	main(int argc, char **argv)
 	pthread_mutex_t forks[PHILO_MAX];
 
 	if (argc != 5 && argc != 6)
-		return(write(2, "WRONG NUMBER OF ARGUMENTS!\n", 23), 1);
+		return(write(2, "WRONG NUMBER OF ARGUMENTS!\n", 27), 1);
 	if (check_correct_args(argv) == 1)
 		return (1);
 	init_simulation(&simulation, philo_sim);
