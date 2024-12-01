@@ -24,7 +24,6 @@ typedef struct s_philo
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
 	pthread_t	thread;
-
 } t_philo;
 
 typedef struct s_simulation
@@ -291,6 +290,12 @@ void	*monitor(void	*ptr)
 	return (ptr);
 }
 
+void	eat(t_philo *philo)
+{
+	pthread_mutex
+}
+
+
 void	*philo_routine(void *ptr)
 {
 	t_philo	*philo;
@@ -298,6 +303,10 @@ void	*philo_routine(void *ptr)
 	philo = (t_philo *)ptr;
 	if (philo->id % 2 == 0)
 		ft_usleep(1);
+	while (!death_loop(philo))
+	{
+		eat(philo);
+	}
 }
 int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
