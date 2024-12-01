@@ -320,6 +320,10 @@ void	philo_sleep(t_philo *philo)
 	ft_usleep(philo->time_to_sleep);
 }
 
+void	philo_think(t_philo *philo)
+{
+	display_info("is thinking", philo, philo->id);
+}
 void	*philo_routine(void *ptr)
 {
 	t_philo	*philo;
@@ -331,7 +335,9 @@ void	*philo_routine(void *ptr)
 	{
 		philo_eat(philo);
 		philo_sleep(philo);
+		philo_think(philo);
 	}
+	return(ptr);
 }
 int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
@@ -345,8 +351,18 @@ int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 	while (i < simulation->philo_sim[0].number_of_philosophers)
 	{
 		if (pthread_create(&simulation->philo_sim[i].thread, NULL, 
-			&philo_routine, &simulation->philo_sim[i]) != 0)
-
+				&philo_routine, &simulation->philo_sim[i]) != 0)
+			destroy_mutex("WRONG THREAD CREATE", simulation, forks);
+		i++;
+	}
+	i = 0;
+	if(pthread_join(monitor_thread, NULL) != 0)
+		destroy_mutex("WRONG THREAD JOIN", simulation, forks);
+	while (i < simulation->philo_sim[0].number_of_philosophers)
+	{
+		if (pthread_join(simulation->philo_sim[0].thread, NULL) != 0)
+			destroy_mutex("WRONG THREAD JOIN", simulation, forks);
+		i++;
 	}
 	return (0);
 }
