@@ -290,7 +290,7 @@ void	*monitor(void	*ptr)
 	return (ptr);
 }
 
-void	eat(t_philo *philo)
+void	philo_eat(t_philo *philo)
 {
 	pthread_mutex_lock(philo->right_fork);
 	display_info("has taken a fork", philo, philo->id);
@@ -314,6 +314,11 @@ void	eat(t_philo *philo)
 	pthread_mutex_unlock(philo->right_fork);
 }
 
+void	philo_sleep(t_philo *philo)
+{
+	display_info("is sleeping", philo, philo->id);
+	ft_usleep(philo->time_to_sleep);
+}
 
 void	*philo_routine(void *ptr)
 {
@@ -324,7 +329,8 @@ void	*philo_routine(void *ptr)
 		ft_usleep(1);
 	while (!death_loop(philo))
 	{
-		eat(philo);
+		philo_eat(philo);
+		philo_sleep(philo);
 	}
 }
 int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
