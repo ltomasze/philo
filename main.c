@@ -81,6 +81,16 @@ size_t	get_current_time(void)
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
+int	ft_usleep(size_t millisec)
+{
+	size_t	start;
+
+	start = get_current_time();
+	while ((get_current_time() - start) < millisec)
+		usleep(500);
+	return (0);
+}
+
 int check_inside_arg(char *arg)
 {
 	int i;
@@ -281,6 +291,14 @@ void	*monitor(void	*ptr)
 	return (ptr);
 }
 
+void	*philo_routine(void *ptr)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)ptr;
+	if (philo->id % 2 == 0)
+		ft_usleep(1);
+}
 int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
 	pthread_t	monitor_thread;
