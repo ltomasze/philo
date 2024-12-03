@@ -175,7 +175,7 @@ void	init_philo_sim(t_philo *philo_sim, t_simulation *simulation,
 		philo_sim[i].left_fork = &forks[i];
 		if (i == 0)
 			philo_sim[i].right_fork = 
-				&forks[philo_sim[i].number_of_philosophers];
+				&forks[philo_sim[i].number_of_philosophers - 1];
 		else
 			philo_sim[i].right_fork = &forks[i - 1];
 		i++;
@@ -258,6 +258,9 @@ int if_finish_eat(t_philo *philo_sim)
 {
 	int i;
 	int	finish_eat;
+
+	i = 0;
+	finish_eat = 0;
 	if (philo_sim[0].number_of_times_each_philosopher_must_eat == -1)
 		return (0);
 	while (i < philo_sim[0].number_of_philosophers)
