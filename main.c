@@ -345,6 +345,7 @@ int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
 	pthread_t	monitor_thread;
 	int	i;
+
 	if (pthread_create(&monitor_thread, NULL, 
 		&monitor, simulation->philo_sim) !=0)
 			destroy_mutex("THREAD CREATE ERROR!", simulation, forks);
@@ -361,7 +362,7 @@ int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 		destroy_mutex("WRONG THREAD JOIN!", simulation, forks);
 	while (i < simulation->philo_sim[0].number_of_philosophers)
 	{
-		if (pthread_join(simulation->philo_sim[0].thread, NULL) != 0)
+		if (pthread_join(simulation->philo_sim[i].thread, NULL) != 0)
 			destroy_mutex("WRONG THREAD JOIN!", simulation, forks);
 		i++;
 	}
