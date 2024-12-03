@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:06:58 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/12/03 13:27:00 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/12/03 16:05:39 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int	check_correct_args(char **argv)
 	if (ft_atoi(argv[4]) <= 0 || check_inside_arg(argv[4]) == 1)
 		return (write(2, "WRONG TIME TO SLEEP PHILOSOPHERS!\n", 34), 1);
 	if (argv[5] && (ft_atoi(argv[5]) < 0 || check_inside_arg(argv[5]) == 1))
-		return (write(2, "WRONG NBR OF TIMES EACH PHILO MUST EAT!\n", 43), 1);
+		return (write(2, "WRONG NBR OF TIMES EACH PHILO MUST EAT!\n", 40), 1);
 	return (0);
 }
 
