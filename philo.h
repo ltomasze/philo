@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 12:31:32 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/12/03 12:43:00 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/12/03 13:28:28 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,29 +48,38 @@ typedef struct s_simulation
 	t_philo			*philo_sim;
 }	t_simulation;
 
+//utils
 int		ft_atoi(const char *nptr);
 size_t	ft_strlen(const char *str);
 size_t	get_current_time(void);
 int		ft_usleep(size_t millisec);
-int		check_inside_arg(char *arg);
-int		check_correct_args(char **argv);
+void	display_info(char *str, t_philo *philo, int id);
+
+//init_simulation.c
 void	init_simulation(t_simulation *simulation, t_philo *philo_sim);
 void	init_forks(pthread_mutex_t *forks, int nbr_philosophers);
 void	init_inside_philo(t_philo *philo, char **argv);
 void	init_philo_sim(t_philo *philo_sim, t_simulation *simulation,
 			pthread_mutex_t *forks, char **argv);
-void	destroy_mutex(char *str, t_simulation *simulation,
-			pthread_mutex_t *forks);
+
+//monitor_philo.c
 int		death_philo(t_philo *philo, size_t time_to_die);
 int		death_loop(t_philo *philo);
-void	display_info(char *str, t_philo *philo, int id);
 int		if_death(t_philo *philo_sim);
 int		if_finish_eat(t_philo *philo_sim);
 void	*monitor(void	*ptr);
+
+//philo_day.c
 void	philo_eat(t_philo *philo);
 void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 void	*philo_routine(void *ptr);
+
+//philo.c
+int		check_inside_arg(char *arg);
+int		check_correct_args(char **argv);
+void	destroy_mutex(char *str, t_simulation *simulation,
+			pthread_mutex_t *forks);
 int		thread_create(t_simulation *simulation, pthread_mutex_t *forks);
 int		main(int argc, char **argv);
 
