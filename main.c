@@ -6,7 +6,7 @@
 /*   By: ltomasze <ltomasze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:06:58 by ltomasze          #+#    #+#             */
-/*   Updated: 2024/12/03 10:59:50 by ltomasze         ###   ########.fr       */
+/*   Updated: 2024/12/03 12:03:07 by ltomasze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,32 +18,32 @@
 
 typedef struct s_philo
 {
-	int	id;
-	int	eat_now;
-	int	meals_eaten;
-	int	number_of_philosophers;
-	size_t												time_to_die;
-	size_t	time_to_eat;
-	size_t	time_to_sleep;
-	int	number_of_times_each_philosopher_must_eat;
-	size_t	start_time;
-	size_t	last_meal;
+	int				id;
+	int				eat_now;
+	int				meals_eaten;
+	int				number_of_philosophers;
+	size_t			time_to_die;
+	size_t			time_to_eat;
+	size_t			time_to_sleep;
+	int				number_of_times_each_philosopher_must_eat;
+	size_t			start_time;
+	size_t			last_meal;
 	pthread_mutex_t	*write_lock;
 	pthread_mutex_t	*death_lock;
 	pthread_mutex_t	*meal_lock;
-	int	*flag_death;
+	int				*flag_death;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
-	pthread_t	thread;
+	pthread_t		thread;
 }	t_philo;
 
 typedef struct s_simulation
 {
-	int	flag_death;
+	int				flag_death;
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	death_lock;
 	pthread_mutex_t	meal_lock;
-	t_philo	*philo_sim;
+	t_philo			*philo_sim;
 }	t_simulation;
 
 int	ft_atoi(const char *nptr)
@@ -356,21 +356,21 @@ void	*philo_routine(void *ptr)
 int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 {
 	pthread_t	monitor_thread;
-	int	i;
+	int			i;
 
 	if (pthread_create(&monitor_thread, NULL,
-		&monitor, simulation->philo_sim) !=0)
-			destroy_mutex("THREAD CREATE ERROR!", simulation, forks);
+			&monitor, simulation->philo_sim) != 0)
+		destroy_mutex("THREAD CREATE ERROR!", simulation, forks);
 	i = 0;
 	while (i < simulation->philo_sim[0].number_of_philosophers)
 	{
-		if (pthread_create(&simulation->philo_sim[i].thread, NULL, 
+		if (pthread_create(&simulation->philo_sim[i].thread, NULL,
 				&philo_routine, &simulation->philo_sim[i]) != 0)
 			destroy_mutex("WRONG THREAD CREATE!", simulation, forks);
 		i++;
 	}
 	i = 0;
-	if(pthread_join(monitor_thread, NULL) != 0)
+	if (pthread_join(monitor_thread, NULL) != 0)
 		destroy_mutex("WRONG THREAD JOIN!", simulation, forks);
 	while (i < simulation->philo_sim[0].number_of_philosophers)
 	{
@@ -383,13 +383,12 @@ int	thread_create(t_simulation *simulation, pthread_mutex_t *forks)
 
 int	main(int argc, char **argv)
 {
-	
 	t_simulation	simulation;
-	t_philo		philo_sim[PHILO_MAX];
-	pthread_mutex_t forks[PHILO_MAX];
+	t_philo			philo_sim[PHILO_MAX];
+	pthread_mutex_t	forks[PHILO_MAX];
 
 	if (argc != 5 && argc != 6)
-		return(write(2, "WRONG NUMBER OF ARGUMENTS!\n", 27), 1);
+		return (write(2, "WRONG NUMBER OF ARGUMENTS!\n", 27), 1);
 	if (check_correct_args(argv) == 1)
 		return (1);
 	init_simulation(&simulation, philo_sim);
